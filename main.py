@@ -170,8 +170,6 @@ te.pensize(1)
 te.speed(Speed)
 te.penup()
 
-input()
-
 for i in SVG.find_all('path'):
     te.title(i.attrs['id'])
     te.color(i.attrs['fill'])
