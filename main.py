@@ -161,7 +161,7 @@ def readSVGFile(cmd):
             yield i
 
 
-SVGFile = open('1.svg', mode='r')
+SVGFile = open(sys.argv[1], mode='r')
 SVG = BeautifulSoup(SVGFile.read(), 'lxml')
 cmd = SVG.path.attrs['d']
 te.setup(height = 1010, starty = 0, startx = 1080 - te.width() - 150)
