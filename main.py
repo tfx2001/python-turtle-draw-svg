@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import cv2
 import os
+from win32.win32api import GetSystemMetrics
 
 WriteStep = 15  # 贝塞尔函数的取样次数
 Speed = 1000
@@ -227,7 +228,7 @@ def drawBitmap(w_image):
         drawSVG('.tmp.svg', '#%02x%02x%02x' % (i[2], i[1], i[0]))
     os.remove('.tmp.bmp')
     os.remove('.tmp.svg')
-    print('\n\rFinished')
+    print('\n\rFinished, close the window to exit.')
     te.done()
 
 
@@ -246,4 +247,7 @@ if __name__ == '__main__':
         print(__file__ + ': error: The file is not exists.')
         sys.exit(2)
     bitmap = cv2.imread(args.filename)
+    if bitmap.shape[0] > GetSystemMetrics(1):
+        bitmap = cv2.resize(bitmap, (int(bitmap.shape[1] * (
+            (GetSystemMetrics(1) - 50) / bitmap.shape[0])), GetSystemMetrics(1) - 50))
     drawBitmap(bitmap)

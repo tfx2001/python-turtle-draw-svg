@@ -8,6 +8,7 @@ lxml = "==4.2.1"
 "beautifulsoup4" = "==4.6.0"
 numpy = "==1.14.5"
 opencv-python = "==3.4.1.15"
+"pywin32" = "*"
 
 [dev-packages]
 
