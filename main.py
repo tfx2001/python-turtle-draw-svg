@@ -1,6 +1,10 @@
 import turtle as te
 from bs4 import BeautifulSoup
+import argparse
 import sys
+import numpy as np
+import cv2
+import os
 
 WriteStep = 15  # 贝塞尔函数的取样次数
 Speed = 1000
@@ -8,6 +12,9 @@ Width = 600  # 界面宽度
 Height = 600  # 界面高度
 Xh = 0  # 记录前一个贝塞尔函数的手柄
 Yh = 0
+scale = (1, 1)
+first = True
+K = 32
 
 
 def Bezier(p1, p2, t):  # 一阶贝塞尔函数
@@ -52,6 +59,12 @@ def Moveto(x, y):  # 移动到svg坐标下（x，y）
     te.pendown()
 
 
+def Moveto_r(dx, dy):
+    te.penup()
+    te.goto(te.xcor() + dx, te.ycor() - dy)
+    te.pendown()
+
+
 def line(x1, y1, x2, y2):  # 连接svg坐标下两点
     te.penup()
     te.goto(-Width / 2 + x1, Height / 2 - y1)
@@ -60,7 +73,7 @@ def line(x1, y1, x2, y2):  # 连接svg坐标下两点
     te.penup()
 
 
-def lineto(dx, dy):  # 连接当前点和相对坐标（dx，dy）的点
+def Lineto_r(dx, dy):  # 连接当前点和相对坐标（dx，dy）的点
     te.pendown()
     te.goto(te.xcor() + dx, te.ycor() - dy)
     te.penup()
@@ -69,36 +82,6 @@ def lineto(dx, dy):  # 连接当前点和相对坐标（dx，dy）的点
 def Lineto(x, y):  # 连接当前点和svg坐标下（x，y）
     te.pendown()
     te.goto(-Width / 2 + x, Height / 2 - y)
-    te.penup()
-
-
-def Horizontal(x):  # 做到svg坐标下横坐标为x的水平线
-    te.pendown()
-    te.setx(x - Width / 2)
-    te.penup()
-
-
-def horizontal(dx):  # 做到相对横坐标为dx的水平线
-    te.seth(0)
-    te.pendown()
-    te.fd(dx)
-    te.penup()
-
-
-def vertical(dy):  # 做到相对纵坐标为dy的垂直线
-    te.seth(-90)
-    te.pendown()
-    te.fd(dy)
-    te.penup()
-    te.seth(0)
-
-
-def polyline(x1, y1, x2, y2, x3, y3):  # 做svg坐标下的折线
-    te.penup()
-    te.goto(-Width / 2 + x1, Height / 2 - y1)
-    te.pendown()
-    te.goto(-Width / 2 + x2, Height / 2 - y2)
-    te.goto(-Width / 2 + x3, Height / 2 - y3)
     te.penup()
 
 
@@ -113,7 +96,7 @@ def Curveto(x1, y1, x2, y2, x, y):  # 三阶贝塞尔曲线到（x，y）
     Yh = y - y2
 
 
-def curveto_r(x1, y1, x2, y2, x, y):  # 三阶贝塞尔曲线到相对坐标（x，y）
+def Curveto_r(x1, y1, x2, y2, x, y):  # 三阶贝塞尔曲线到相对坐标（x，y）
     te.penup()
     X_now = te.xcor() + Width / 2
     Y_now = Height / 2 - te.ycor()
@@ -125,84 +108,142 @@ def curveto_r(x1, y1, x2, y2, x, y):  # 三阶贝塞尔曲线到相对坐标（x
     Yh = y - y2
 
 
-def Smooth(x2, y2, x, y):  # 平滑三阶贝塞尔曲线到（x，y）
-    global Xh
-    global Yh
-    te.penup()
-    X_now = te.xcor() + Width / 2
-    Y_now = Height / 2 - te.ycor()
-    Bezier_3(X_now, Y_now, X_now + Xh, Y_now + Yh, x2, y2, x, y)
-    Xh = x - x2
-    Yh = y - y2
+def transform(w_attr):
+    funcs = w_attr.split(' ')
+    for func in funcs:
+        func_name = func[0: func.find('(')]
+        if func_name == 'scale':
+            global scale
+            scale = (float(func[func.find('(') + 1: -1].split(',')[0]),
+                     -float(func[func.find('(') + 1: -1].split(',')[1]))
 
 
-def smooth_r(x2, y2, x, y):  # 平滑三阶贝塞尔曲线到相对坐标（x，y）
-    global Xh
-    global Yh
-    te.penup()
-    X_now = te.xcor() + Width / 2
-    Y_now = Height / 2 - te.ycor()
-    Bezier_3(X_now, Y_now, X_now + Xh, Y_now + Yh,
-             X_now + x2, Y_now + y2, X_now + x, Y_now + y)
-    Xh = x - x2
-    Yh = y - y2
-
-
-def readSVGFile(cmd):
-    ulist = cmd.split(' ')
+def readPathAttrD(w_attr):
+    ulist = w_attr.split(' ')
     for i in ulist:
         # print("now cmd:", i)
-        if i.isdigit() is True:
+        if i.isdigit() or i.isalpha():
             yield float(i)
-        elif i.find(',') != -1:
-            yield float(i[0: i.find(',')])
-            yield float(i[i.find(',') + 1:])
-        else:
-            yield i
+        elif i[0].isalpha():
+            yield i[0]
+            yield float(i[1:])
+        elif i[-1].isalpha():
+            yield float(i[0: -1])
+        elif i[0] == '-':
+            yield float(i)
 
 
-SVGFile = open(sys.argv[1], mode='r')
-SVG = BeautifulSoup(SVGFile.read(), 'lxml')
-cmd = SVG.path.attrs['d']
-te.setup(height = 1010, starty = 0, startx = 1080 - te.width() - 150)
-te.tracer(100)
-te.pensize(1)
-te.speed(Speed)
-te.penup()
+def drawSVG(filename, w_color):
+    global first
+    SVGFile = open(filename, 'r')
+    SVG = BeautifulSoup(SVGFile.read(), 'lxml')
+    Height = float(SVG.svg.attrs['height'][0: -2])
+    Width = float(SVG.svg.attrs['width'][0: -2])
+    transform(SVG.g.attrs['transform'])
+    if first:
+        te.setup(height=Height, width=Width)
+        te.setworldcoordinates(-Width / 2, 300, Width -
+                               Width / 2, -Height + 300)
+        first = False
+    te.tracer(1000)
+    te.pensize(1)
+    te.speed(Speed)
+    te.penup()
+    te.color(w_color)
 
-for i in SVG.find_all('path'):
-    te.title(i.attrs['id'])
-    te.color(i.attrs['fill'])
+    for i in SVG.find_all('path'):
+        attr = i.attrs['d'].replace('\n', ' ')
+        f = readPathAttrD(attr)
+        lastI = ''
+        for i in f:
+            if i == 'M':
+                te.end_fill()
+                Moveto(f.__next__() * scale[0], f.__next__() * scale[1])
+                te.begin_fill()
+            elif i == 'm':
+                te.end_fill()
+                Moveto_r(f.__next__() * scale[0], f.__next__() * scale[1])
+                te.begin_fill()
+            elif i == 'C':
+                Curveto(f.__next__() * scale[0], f.__next__() * scale[1],
+                        f.__next__() * scale[0], f.__next__() * scale[1],
+                        f.__next__() * scale[0], f.__next__() * scale[1])
+                lastI = i
+            elif i == 'c':
+                Curveto_r(f.__next__() * scale[0], f.__next__() * scale[1],
+                          f.__next__() * scale[0], f.__next__() * scale[1],
+                          f.__next__() * scale[0], f.__next__() * scale[1])
+                lastI = i
+            elif i == 'L':
+                Lineto(f.__next__() * scale[0], f.__next__() * scale[1])
+            elif i == 'l':
+                Lineto_r(f.__next__() * scale[0], f.__next__() * scale[1])
+                lastI = i
+            elif lastI == 'C':
+                Curveto(i * scale[0], f.__next__() * scale[1],
+                        f.__next__() * scale[0], f.__next__() * scale[1],
+                        f.__next__() * scale[0], f.__next__() * scale[1])
+            elif lastI == 'c':
+                Curveto_r(i * scale[0], f.__next__() * scale[1],
+                          f.__next__() * scale[0], f.__next__() * scale[1],
+                          f.__next__() * scale[0], f.__next__() * scale[1])
+            elif lastI == 'L':
+                Lineto(i * scale[0], f.__next__() * scale[1])
+            elif lastI == 'l':
+                Lineto_r(i * scale[0], f.__next__() * scale[1])
+    te.penup()
+    te.hideturtle()
+    te.update()
+    SVGFile.close()
 
-    cmd = i.attrs['d']
 
-    f = readSVGFile(cmd)
-    for i in f:
+def drawBitmap(w_image):
+    print('Reducing the colors...')
+    Z = w_image.reshape((-1, 3))
+
+    # convert to np.float32
+    Z = np.float32(Z)
+
+    # define criteria, number of clusters(K) and apply kmeans()
+    criteria = (cv2.TERM_CRITERIA_EPS, 10, 1.0)
+    global K
+    ret, label, center = cv2.kmeans(
+        Z, K, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+
+    # Now convert back into uint8, and make original image
+    center = np.uint8(center)
+    res = center[label.flatten()]
+    res = res.reshape(w_image.shape)
+    no = 1
+    for i in center:
+        sys.stdout.write('\rDrawing: %.2f%% [' % (
+            no / K * 100) + '#' * no + ' ' * (K - no) + ']')
+        no += 1
+        res2 = cv2.inRange(res, i, i)
+        res2 = cv2.bitwise_not(res2)
+        cv2.imwrite('.tmp.bmp', res2)
+        os.system('potrace.exe .tmp.bmp -s --flat')
         # print(i)
-        if i is 'M':
-            x = float(f.__next__())
-            y = float(f.__next__())
-            te.end_fill()
-            Moveto(x, y)
-            te.begin_fill()
-        elif i is 'L':
-            x1 = float(f.__next__())
-            y1 = float(f.__next__())
-            x2 = float(f.__next__())
-            y2 = float(f.__next__())
-            line(x1, y1, x2, y2)
-        elif i is 'C':
-            x1 = float(f.__next__())
-            y1 = float(f.__next__())
-            x2 = float(f.__next__())
-            y2 = float(f.__next__())
-            x = float(f.__next__())
-            y = float(f.__next__())
-            # te.begin_fill()
-            Curveto(x1, y1, x2, y2, x, y)
-            # te.end_fill()
+        drawSVG('.tmp.svg', '#%02x%02x%02x' % (i[2], i[1], i[0]))
+    os.remove('.tmp.bmp')
+    os.remove('.tmp.svg')
+    print('\n\rFinished')
+    te.done()
 
-te.penup()
-te.hideturtle()
-te.update()
-te.done()
+
+if __name__ == '__main__':
+    paser = argparse.ArgumentParser(
+        description="Convert an bitmap to SVG and use turtle libray to draw it.")
+    paser.add_argument('filename', type=str,
+                       help='The file(*.jpg, *.png, *.bmp) name of the file you want to convert.')
+    paser.add_argument(
+        "-c", "--color", help="How many colors you want to draw.(If the number is too large that the program may be very slow.)", type=int, default=32)
+    args = paser.parse_args()
+    K = args.color
+    try:
+        bitmapFile = open(args.filename, mode='r')
+    except FileNotFoundError:
+        print(__file__ + ': error: The file is not exists.')
+        sys.exit(2)
+    bitmap = cv2.imread(args.filename)
+    drawBitmap(bitmap)

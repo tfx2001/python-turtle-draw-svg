@@ -9,18 +9,29 @@
 
 
 
-一个使用了Python自带的turtle库来画SVG文件的小程序。
+可以把位图转化为svg然后使用turtle库画出来。
 
 # Usage
 
 ```
-python ./main.py *.svg
+usage: main.py [-h] [-c COLOR] filename
+
+Convert an bitmap to SVG and use turtle libray to draw it.
+
+positional arguments:
+  filename              The file(*.jpg, *.png, *.bmp) name of the file you
+                        want to convert.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c COLOR, --color COLOR
+                        How many colors you want to draw.(If the number is too
+                        large that the program may be very slow.)
 ```
 
 # Dependents
 
-* [BeautifulSoup4](https://pypi.org/project/beautifulsoup4/)
-* [lxml](https://pypi.org/project/lxml/)
+See `requirements.txt` .
 
 # License
 
