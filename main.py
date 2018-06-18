@@ -146,7 +146,7 @@ def drawSVG(filename, w_color):
         te.setworldcoordinates(-Width / 2, 300, Width -
                                Width / 2, -Height + 300)
         first = False
-    te.tracer(1000)
+    te.tracer(100)
     te.pensize(1)
     te.speed(Speed)
     te.penup()
