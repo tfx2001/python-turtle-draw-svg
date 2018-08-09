@@ -35,7 +35,7 @@ See `requirements.txt` .
 
 # Demo Video
 
-(【自制展示】用 Python的 turtle库画小姐姐)[http://www.bilibili.com/video/av20349733?share_medium=android&share_source=copy_link&bbid=37902872-DA4A-4D5D-878B-AEE788048F4217066infoc&ts=1533854267282]
+[【自制展示】用 Python的 turtle库画小姐姐](http://www.bilibili.com/video/av20349733?share_medium=android&share_source=copy_link&bbid=37902872-DA4A-4D5D-878B-AEE788048F4217066infoc&ts=1533854267282)
 
 # Reference
 
