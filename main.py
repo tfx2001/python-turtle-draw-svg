@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# Author: tfx2001
+# License: GNU GPLv3
+# Time: 2018-08-09 18:27
+
 import turtle as te
 from bs4 import BeautifulSoup
 import argparse

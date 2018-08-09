@@ -38,6 +38,7 @@ See `requirements.txt` .
 1. [potrace.exe](http://potrace.sourceforge.net/)
 2. [Python123](https://www.python123.io/index/turtle_drawing/5a006e85283c653c6d3219d8)
 3. [深度掌握SVG路径path的贝塞尔曲线指令](https://www.zhangxinxu.com/wordpress/2014/06/deep-understand-svg-path-bezier-curves-command/)
+4. [K-Means Clustering in OpenCV](https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_ml/py_kmeans/py_kmeans_opencv/py_kmeans_opencv.html)
 
 # License
 
