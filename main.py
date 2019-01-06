@@ -164,39 +164,39 @@ def drawSVG(filename, w_color):
         for i in f:
             if i == 'M':
                 te.end_fill()
-                Moveto(f.__next__() * scale[0], f.__next__() * scale[1])
+                Moveto(next(f) * scale[0], next(f) * scale[1])
                 te.begin_fill()
             elif i == 'm':
                 te.end_fill()
-                Moveto_r(f.__next__() * scale[0], f.__next__() * scale[1])
+                Moveto_r(next(f) * scale[0], next(f) * scale[1])
                 te.begin_fill()
             elif i == 'C':
-                Curveto(f.__next__() * scale[0], f.__next__() * scale[1],
-                        f.__next__() * scale[0], f.__next__() * scale[1],
-                        f.__next__() * scale[0], f.__next__() * scale[1])
+                Curveto(next(f) * scale[0], next(f) * scale[1],
+                        next(f) * scale[0], next(f) * scale[1],
+                        next(f) * scale[0], next(f) * scale[1])
                 lastI = i
             elif i == 'c':
-                Curveto_r(f.__next__() * scale[0], f.__next__() * scale[1],
-                          f.__next__() * scale[0], f.__next__() * scale[1],
-                          f.__next__() * scale[0], f.__next__() * scale[1])
+                Curveto_r(next(f) * scale[0], next(f) * scale[1],
+                          next(f) * scale[0], next(f) * scale[1],
+                          next(f) * scale[0], next(f) * scale[1])
                 lastI = i
             elif i == 'L':
-                Lineto(f.__next__() * scale[0], f.__next__() * scale[1])
+                Lineto(next(f) * scale[0], next(f) * scale[1])
             elif i == 'l':
-                Lineto_r(f.__next__() * scale[0], f.__next__() * scale[1])
+                Lineto_r(next(f) * scale[0], next(f) * scale[1])
                 lastI = i
             elif lastI == 'C':
-                Curveto(i * scale[0], f.__next__() * scale[1],
-                        f.__next__() * scale[0], f.__next__() * scale[1],
-                        f.__next__() * scale[0], f.__next__() * scale[1])
+                Curveto(i * scale[0], next(f) * scale[1],
+                        next(f) * scale[0], next(f) * scale[1],
+                        next(f) * scale[0], next(f) * scale[1])
             elif lastI == 'c':
-                Curveto_r(i * scale[0], f.__next__() * scale[1],
-                          f.__next__() * scale[0], f.__next__() * scale[1],
-                          f.__next__() * scale[0], f.__next__() * scale[1])
+                Curveto_r(i * scale[0], next(f) * scale[1],
+                          next(f) * scale[0], next(f) * scale[1],
+                          next(f) * scale[0], next(f) * scale[1])
             elif lastI == 'L':
-                Lineto(i * scale[0], f.__next__() * scale[1])
+                Lineto(i * scale[0], next(f) * scale[1])
             elif lastI == 'l':
-                Lineto_r(i * scale[0], f.__next__() * scale[1])
+                Lineto_r(i * scale[0], next(f) * scale[1])
     te.penup()
     te.hideturtle()
     te.update()

@@ -1,5 +1,5 @@
 [[source]]
-url = "https://pypi.org/simple"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 verify_ssl = true
 name = "pypi"
 
@@ -11,10 +11,7 @@ opencv-python = "==3.4.1.15"
 "pywin32" = "==223"
 
 [dev-packages]
+pylint = "*"
 
 [requires]
 python_version = "3.6"
-
-[[source]]
-url = "https://pypi.org/simple"
-verify_ssl = true
