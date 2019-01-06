@@ -250,7 +250,10 @@ if __name__ == '__main__':
         bitmapFile = open(args.filename, mode='r')
     except FileNotFoundError:
         print(__file__ + ': error: The file is not exists.')
-        sys.exit(2)
+        quit()
+    if os.path.splitext(args.filename)[1].lower() not in ['.jpg', '.bmp', '.png']:
+        print(__file__ + ': error: The file is not a bitmap file.')
+        quit()
     bitmap = cv2.imread(args.filename)
     if bitmap.shape[0] > GetSystemMetrics(1):
         bitmap = cv2.resize(bitmap, (int(bitmap.shape[1] * (
